@@ -1,0 +1,46 @@
+services:
+    home-broker: 
+      image:  eclipse-mosquitto
+      container_name: mosquito
+      ports:
+        - 1884:1883
+      networks:
+        - rede
+
+      restart: always
+    
+
+    rabbitMQ:
+      image: rabbitmq:3.12-management 
+      container_name: rabbitmq 
+      ports:
+        - "5673:5672"
+        - "15673:15672"
+      environment:
+        RABBITMQ_DEFAULT_USER: metam
+        RABBITMQ_DEFAULT_PASS: metam
+        RABBITMQ_PLUGINS: rabbitmq_management
+      networks:
+        - "rede"
+      depends_on:
+        - home-broker
+
+      
+    consumermqtt:
+      build: ./deploy/mqttcon
+      depends_on:
+        - home-broker
+        - rabbitMQ
+            
+      networks:
+        - "rede"
+
+    pubmqtt:
+      build: ./deploy/mqttpub
+      depends_on:
+        - consumermqtt
+      networks:
+        - "rede"
+      
+networks:
+  rede:

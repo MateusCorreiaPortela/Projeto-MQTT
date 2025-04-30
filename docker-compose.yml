@@ -1,41 +1,83 @@
 services:
-    mosquitto: 
-      image:  eclipse-mosquitto
-      container_name: mosquitto
-      ports:
-        - 1884:1883
-      volumes:
-        - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
-      networks:
-        - rede
+  mosquitto: 
+    image:  eclipse-mosquitto
+    container_name: mosquitto
+    ports:
+      - 1884:1883
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+    networks:
+      - rede
 
-      restart: always
-    
+    restart: always
+  
 
-    rabbitMQ:
-      image: rabbitmq:3.12-management 
-      container_name: rabbitmq 
-      ports:
-        - "5673:5672"
-        - "15673:15672"
-      environment:
-        RABBITMQ_DEFAULT_USER: metam
-        RABBITMQ_DEFAULT_PASS: metam
-        RABBITMQ_PLUGINS: rabbitmq_management
-      networks:
-        - "rede"
-      depends_on:
-        - mosquitto
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - rede
+    restart: always
 
-    consumermqtt:
-      build: ./deploy/mqttcon
-      depends_on:
-        - mosquitto
-        - rabbitMQ    
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+
+    networks:
+      - rede
+    depends_on:
+      - mongo
+
+
+
+
+  rabbitMQ:
+    image: rabbitmq:3.12-management 
+    container_name: rabbitmq 
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: metam
+      RABBITMQ_DEFAULT_PASS: metam
+      RABBITMQ_PLUGINS: rabbitmq_management
+    networks:
+      - "rede"
+    depends_on:
+      - mosquitto
+
+  consumermqtt:
+    build: ./deploy/mqttcon
+    depends_on:
+      - mosquitto
+      - rabbitMQ    
       
-      networks:
-        - "rede"
+    networks:
+      - "rede"
 
-      restart: always
+    restart: always
+  
+  consumeramqp:
+    build: ./deploy/amqpcon
+    depends_on:
+      - mongo
+      - mongo-express
+      - consumermqtt
+    networks:
+      - "rede"
+
+    restart: always
+
+
+volumes:
+  mongodb_data:
 networks:
   rede:

@@ -43,4 +43,3 @@ client.on_message = on_messsage
 client.subscribe('topico1')
 client.loop_forever()
 
-time.sleep(10)

@@ -27,18 +27,15 @@ services:
       depends_on:
         - mosquitto
 
-      
     consumermqtt:
       build: ./deploy/mqttcon
       depends_on:
         - mosquitto
         - rabbitMQ    
-
-
+      
       networks:
         - "rede"
 
       restart: always
-
 networks:
   rede:

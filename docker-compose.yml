@@ -1,9 +1,11 @@
 services:
-    home-broker: 
+    mosquitto: 
       image:  eclipse-mosquitto
-      container_name: mosquito
+      container_name: mosquitto
       ports:
         - 1884:1883
+      volumes:
+        - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
       networks:
         - rede
 
@@ -23,24 +25,20 @@ services:
       networks:
         - "rede"
       depends_on:
-        - home-broker
+        - mosquitto
 
       
     consumermqtt:
       build: ./deploy/mqttcon
       depends_on:
-        - home-broker
-        - rabbitMQ
-            
+        - mosquitto
+        - rabbitMQ    
+
+
       networks:
         - "rede"
 
-    pubmqtt:
-      build: ./deploy/mqttpub
-      depends_on:
-        - consumermqtt
-      networks:
-        - "rede"
-      
+      restart: always
+
 networks:
   rede:

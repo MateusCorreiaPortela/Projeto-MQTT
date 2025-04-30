@@ -11,7 +11,7 @@ mensagem_dispositivo = {
     }
 
 dispositivo = mqtt.Client(client_id='Dispositivo')
-dispositivo.connect('localhost')
+dispositivo.connect('mosquitto')
 dispositivo.loop_start()
 dispositivo.publish('topico1', json.dumps(mensagem_dispositivo))
 

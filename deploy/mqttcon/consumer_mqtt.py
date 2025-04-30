@@ -4,8 +4,8 @@ import json
 from pydantic import BaseModel
 import pika
 
-
-connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+credentials = pika.PlainCredentials('metam','metam')
+connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq',5672,'/',credentials))
 channel = connection.channel()
 
 channel.queue_declare(queue='fila1')
@@ -38,11 +38,9 @@ class Validacao(BaseModel):
 
 
 client = mqtt.Client(client_id='Cliente')
-client.connect("localhost")
+client.connect("mosquitto")
 client.on_message = on_messsage
-client.loop_start()
 client.subscribe('topico1')
-
+client.loop_forever()
 
 time.sleep(10)
-client.loop_stop()
